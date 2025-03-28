@@ -1,4 +1,4 @@
-package converter;
+package fxml2java.converter;
 
 public class CodeBuilder {
   private final StringBuilder stringBuilder;

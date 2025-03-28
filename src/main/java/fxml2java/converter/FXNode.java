@@ -1,4 +1,4 @@
-package converter;
+package fxml2java.converter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;

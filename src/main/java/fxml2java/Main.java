@@ -1,9 +1,16 @@
-import converter.FXMLToJavaConvertor;
-import converter.MainClass;
+package fxml2java;
+
+import fxml2java.converter.FXMLToJavaConvertor;
+import fxml2java.converter.MainClass;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+@fxml2java.CompileFxml(
+        fxmls = {
+                "src/main/resources/Main.fxml",
+        }
+)
 public class Main
 {
     public static void main(String[] args)

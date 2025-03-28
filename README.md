@@ -4,8 +4,8 @@ Simple fxml to java code converter. You can drag a fxml file from file explorer 
 fxml2java.exe [path/to/fxmlfilename] 
 or
 java -jar fxml2java.jar [path/to/fxmlfilename]
-# Main window screenshot
-![Main](main.png)
+# fxml2java.converter.Main window screenshot
+![fxml2java.converter.Main](main.png)
 # Intellij external tool setting
 ![Intellij](intellij-externaltool-setting.png)
 After adding external tool setting you can convert a fxml file to java code from context menu in intellij ide. You can add this tools to other IDEs as external command similarly.

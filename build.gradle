@@ -44,7 +44,7 @@ sourceSets {
         }
     }
 }
-jar{
+jar {
     manifest {
         attributes(
                 "Main-Class": "$mainClassName",
