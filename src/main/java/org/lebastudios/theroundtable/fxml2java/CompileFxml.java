@@ -1,4 +1,4 @@
-package fxml2java;
+package org.lebastudios.theroundtable.fxml2java;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

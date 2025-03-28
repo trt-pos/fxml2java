@@ -1,4 +1,4 @@
-package fxml2java.converter;
+package org.lebastudios.theroundtable.fxml2java.converter;
 
 import java.util.ArrayList;
 

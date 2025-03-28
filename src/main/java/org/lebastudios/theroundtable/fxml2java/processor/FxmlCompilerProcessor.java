@@ -1,8 +1,8 @@
-package fxml2java.processor;
+package org.lebastudios.theroundtable.fxml2java.processor;
 
-import fxml2java.CompileFxml;
-import fxml2java.converter.FXMLToJavaConvertor;
-import fxml2java.converter.MainClass;
+import org.lebastudios.theroundtable.fxml2java.CompileFxml;
+import org.lebastudios.theroundtable.fxml2java.converter.FXMLToJavaConvertor;
+import org.lebastudios.theroundtable.fxml2java.converter.MainClass;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -13,10 +13,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
-@SupportedAnnotationTypes("fxml2java.CompileFxml")
+@SupportedAnnotationTypes("org.lebastudios.therountable.fxml2java.CompileFxml")
 @SupportedSourceVersion(SourceVersion.RELEASE_22)
 public class FxmlCompilerProcessor extends AbstractProcessor
 {

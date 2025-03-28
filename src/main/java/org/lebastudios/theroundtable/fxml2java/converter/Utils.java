@@ -1,4 +1,4 @@
-package fxml2java.converter;
+package org.lebastudios.theroundtable.fxml2java.converter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
