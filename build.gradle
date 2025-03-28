@@ -20,17 +20,9 @@ mainClassName = 'Main'
 repositories {
     mavenCentral()
 }
-application {
-    // Define the main class for the application.
-    mainClassName = "$mainClassName"
-}
 compileJava {
     sourceCompatibility = '22'
     targetCompatibility = '22'
-}
-dependencies {
-    implementation fileTree('libs') { include '*.jar' }
-
 }
 
 test {
@@ -66,41 +58,3 @@ jar{
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn ('dependencies')
 }
-import proguard.gradle.ProGuardTask
-
-tasks.register('proguard', ProGuardTask) {
-    dependsOn shadowJar
-    //def archivePath = shadowJar.archiveFile.get().asFile.path
-    //configuration 'configuration.pro'
-
-    verbose
-    // Specify the input jars, output jars, and library jars.
-    injars shadowJar
-    outjars "$buildDir/libs/${project.name}-${project.version}-all-obf.jar"
-    //outjars archivePath.replace(".jar", "-obf.jar")
-
-    // Automatically handle the Java version of this build.
-    if (System.getProperty('java.version').startsWith('1.')) {
-        // Before Java 9, the runtime classes were packaged in a single jar file.
-        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
-        libraryjars "${System.getProperty('java.home')}/lib/ext/jfxrt.jar"
-    } else {
-        // As of Java 9, the runtime classes are packaged in modular jmod files.
-        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-        //libraryjars "${System.getProperty('java.home')}/jmods/....."
-    }
-
-    renamesourcefileattribute 'SourceFile'
-    keepattributes 'SourceFile,LineNumberTable'
-
-    // Preserve all annotations.
-    keepattributes '*Annotation*'
-
-    // Preserve all public applications.
-    keepclasseswithmembers 'public class * { \
-        public static void main(java.lang.String[]); \
-    }'
-
-
-}
-

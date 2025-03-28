@@ -11,7 +11,7 @@
 
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Tab?>
-<VBox minHeight="340.0" prefHeight="340.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<VBox minHeight="340.0" prefHeight="340.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox alignment="CENTER" prefHeight="36.0" prefWidth="580.0">
          <children>

@@ -8,19 +8,18 @@ public class Main
 {
     public static void main(String[] args)
     {
-
         String fxmlPath = args[0];
         String fxmlFolder = fxmlPath.substring(0, fxmlPath.lastIndexOf('/'));
         File fxmlFile = new File(fxmlPath);
         String fxmlFileName = fxmlFile.getName();
 
         String outputPath = fxmlFolder
-                .replace("/resources/", "/java/");
+                .replace("resources", "java");
 
         String className = fxmlFileName
                 .substring(0, 1).toUpperCase()
                 + fxmlFileName.substring(1).replace(".fxml", "")
-                + "View";
+                + "$View";
 
         File outputFile = new File(outputPath, className + ".java");
 

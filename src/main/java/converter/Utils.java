@@ -14,16 +14,16 @@ import org.w3c.dom.NodeList;
 public class Utils {
   public static Double[] getInsets(Node insets) {
     Node valueNode = insets.getAttributes().getNamedItem("top");
-    double top = Double.valueOf((valueNode == null) ? "0.0" : valueNode.getNodeValue()).doubleValue();
+    double top = Double.parseDouble((valueNode == null) ? "0.0" : valueNode.getNodeValue());
     valueNode = insets.getAttributes().getNamedItem("right");
-    double right = Double.valueOf((valueNode == null) ? "0.0" : valueNode.getNodeValue()).doubleValue();
+    double right = Double.parseDouble((valueNode == null) ? "0.0" : valueNode.getNodeValue());
     valueNode = insets.getAttributes().getNamedItem("bottom");
-    double bottom = Double.valueOf((valueNode == null) ? "0.0" : valueNode.getNodeValue()).doubleValue();
+    double bottom = Double.parseDouble((valueNode == null) ? "0.0" : valueNode.getNodeValue());
     valueNode = insets.getAttributes().getNamedItem("left");
-    double left = Double.valueOf((valueNode == null) ? "0.0" : valueNode.getNodeValue()).doubleValue();
+    double left = Double.parseDouble((valueNode == null) ? "0.0" : valueNode.getNodeValue());
     if (top == right && top == bottom && top == left)
-      return new Double[] { Double.valueOf(top) };
-    return new Double[] { Double.valueOf(top), Double.valueOf(right), Double.valueOf(bottom), Double.valueOf(left) };
+      return new Double[] {top};
+    return new Double[] {top, right, bottom, left};
   }
 
   public static String getVariableNameFor(StringList declarationList, Node node) {
@@ -43,7 +43,7 @@ public class Utils {
       if (previousName.equals(newVariableName)) {
         char last = previousName.charAt(previousName.length() - 1);
         if (Character.isDigit(last)) {
-          int counter = Integer.valueOf(Character.toString(last));
+          int counter = Integer.parseInt(Character.toString(last));
           counter++;
           newVariableName = newVariableName.substring(0, newVariableName.length() - 1) + counter;
         } else {
