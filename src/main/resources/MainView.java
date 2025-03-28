@@ -7,8 +7,10 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.Tab;
 
-public abstract class MainBase extends VBox {
+public abstract class MainView extends VBox {
 
     protected final HBox hBox;
     protected final Label label;
@@ -32,7 +34,7 @@ public abstract class MainBase extends VBox {
     protected final HBox hBox5;
     protected final Label label4;
 
-    public MainBase() {
+    public MainView() {
 
         hBox = new HBox();
         label = new Label();
@@ -166,3 +168,4 @@ public abstract class MainBase extends VBox {
     protected abstract void handleConvert(javafx.event.ActionEvent actionEvent);
 
 }
+//Warning! Don't modify this class manually.

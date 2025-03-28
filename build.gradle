@@ -11,6 +11,7 @@ plugins {
     id 'java'
     id 'application'
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group 'io.github.garawaa'
@@ -24,8 +25,8 @@ application {
     mainClassName = "$mainClassName"
 }
 compileJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = '22'
+    targetCompatibility = '22'
 }
 dependencies {
     implementation fileTree('libs') { include '*.jar' }
@@ -34,6 +35,10 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+javafx {
+    version = "24"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 shadowJar {
     manifest {
@@ -62,14 +67,15 @@ jar{
     dependsOn ('dependencies')
 }
 import proguard.gradle.ProGuardTask
-task ('proguard', type: ProGuardTask) {
+
+tasks.register('proguard', ProGuardTask) {
     dependsOn shadowJar
     //def archivePath = shadowJar.archiveFile.get().asFile.path
     //configuration 'configuration.pro'
 
     verbose
     // Specify the input jars, output jars, and library jars.
-    injars  shadowJar
+    injars shadowJar
     outjars "$buildDir/libs/${project.name}-${project.version}-all-obf.jar"
     //outjars archivePath.replace(".jar", "-obf.jar")
 
