@@ -11,6 +11,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.JavaFileObject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
@@ -55,19 +56,24 @@ public class FxmlCompilerProcessor extends AbstractProcessor
                 .replace(fxmlFileName, "")
                 .replace("/", ".");
 
-        try (InputStream inputStream = new FileInputStream(fxmlFile);
-             Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8)
-        )
+        try
         {
-            MainClass mainClass = new MainClass(className, packageName);
-            mainClass.setClassModifiers(1, 1024);
-            mainClass.setNodeModifiers(4, 16);
-            mainClass.setMethodModifiers(4, 1024);
-            FXMLToJavaConvertor convertor = new FXMLToJavaConvertor();
-            convertor.convert(mainClass, inputStream);
+            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(className);
+            
+            try (InputStream inputStream = new FileInputStream(fxmlFile);
+                 Writer writer = builderFile.openWriter()
+            )
+            {
+                MainClass mainClass = new MainClass(className, packageName);
+                mainClass.setClassModifiers(1, 1024);
+                mainClass.setNodeModifiers(4, 16);
+                mainClass.setMethodModifiers(4, 1024);
+                FXMLToJavaConvertor convertor = new FXMLToJavaConvertor();
+                convertor.convert(mainClass, inputStream);
 
-            String content = mainClass.toString();
-            writer.write(content);
+                String content = mainClass.toString();
+                writer.write(content);
+            }
         }
         catch (Exception e)
         {
