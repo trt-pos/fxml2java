@@ -9,7 +9,6 @@ import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Names;
-import com.sun.tools.javac.util.Options;
 import org.lebastudios.theroundtable.fxml2java.CompileFxml;
 import org.lebastudios.theroundtable.fxml2java.converter.FXMLToJavaConvertor;
 import org.lebastudios.theroundtable.fxml2java.converter.MainClass;
@@ -18,6 +17,7 @@ import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.*;
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ import java.util.Set;
 @SupportedSourceVersion(SourceVersion.RELEASE_22)
 public class FxmlCompilerProcessor extends AbstractProcessor
 {
+    private boolean toolsExported = true;
     private Trees trees;
     private TreeMaker treeMaker;
     private Names names;
@@ -48,7 +49,8 @@ public class FxmlCompilerProcessor extends AbstractProcessor
         }
         catch (Exception exception)
         {
-            
+            toolsExported = false;
+            printMissingExportWarning();
         }
     }
 
@@ -79,7 +81,18 @@ public class FxmlCompilerProcessor extends AbstractProcessor
         for (String fxmlPath : fxmlPaths)
         {
             generateCompiledFxml(fxmlPath);
-            generateControllerMethod(fxmlPath);
+            if (toolsExported) 
+            {
+                try
+                {
+                    generateControllerMethod(fxmlPath);
+                }
+                catch (Exception exception)
+                {
+                    toolsExported = false;
+                    printMissingExportWarning();
+                }
+            }
         }
         
         return true;
@@ -163,11 +176,11 @@ public class FxmlCompilerProcessor extends AbstractProcessor
         );
 
         JCTree.JCNewClass newInstance = treeMaker.NewClass(
-                null,                          // No hay tipo externo
-                List.nil(),                    // No hay argumentos de tipo genérico
-                treeMaker.Ident(names.fromString(viewClassName)), // Nombre de la clase
-                List.of(treeMaker.Ident(names.fromString("this"))),  // Argumentos del constructor
-                null                           // No hay cuerpo de clase anidado
+                null,                         
+                List.nil(),                    
+                treeMaker.Ident(names.fromString(viewClassName)),
+                List.of(treeMaker.Ident(names.fromString("this"))),  
+                null                          
         );
 
         JCTree.JCExpressionStatement assignStatement = treeMaker.Exec(
@@ -185,18 +198,46 @@ public class FxmlCompilerProcessor extends AbstractProcessor
                 )
         );
 
-        // Crea un bloque con ambas instrucciones
         JCTree.JCBlock block = treeMaker.Block(0, List.of(assignStatement, initializeCall));
 
         return treeMaker.MethodDef(
-                treeMaker.Modifiers(Flags.PROTECTED),  // Modificadores con la anotación @Override
-                names.fromString("loadFXML"),  // Nombre del método
-                treeMaker.TypeIdent(TypeTag.VOID),   // Tipo de retorno (void)
-                List.nil(),                          // Parámetros vacíos
-                List.nil(),                          // Excepciones lanzadas (vacío)
-                List.nil(),                          // Anotaciones (vacío)
-                block,                               // El bloque con la asignación y la llamada
-                null                                 // Comentarios (null)
+                treeMaker.Modifiers(Flags.PROTECTED),
+                names.fromString("loadFXML"),
+                treeMaker.TypeIdent(TypeTag.VOID),   
+                List.nil(),                          
+                List.nil(),                          
+                List.nil(),                          
+                block,                               
+                null                                 
+        );
+    }
+    
+    private void printMissingExportWarning()
+    {
+        processingEnv.getMessager().printMessage(
+                Diagnostic.Kind.WARNING,
+                """
+FXMLCompilerProcessor: Missing exports detected:
+--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED
+--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED
+--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED
+
+The compile process will finish as always but the generated code will not be created.
+This means that the FXML has beed compiled but the code to use them isn't generated.
+The default loadFxml() method implemented in the Controller class detects the compiled view
+and uses reflexion to build it but, if you want to avoid it, override the loadFxml() method
+as we show here:
+
+protected void loadFXML() {
+    this.root = new <ExamplePane$View>(this);
+    this.initialize();
+}
+
+Note: The controller for this example is ExamplePaneController and the FXML file is examplePane.fxml
+"""
+                
         );
     }
 }
