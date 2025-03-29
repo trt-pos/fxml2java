@@ -79,6 +79,7 @@ public class Utils {
   }
 
   public static void parseChildrens(FXNode fXNode, String variableName, String dot) {
+    FXNode actualNode = fXNode;
     StringList attributeList = fXNode.getAttributeList();
     StringList childList = fXNode.getChildList();
     NodeList childNodes = fXNode.getNode().getChildNodes();
@@ -282,7 +283,6 @@ public class Utils {
             case "panes":
             case "xAxis":
             case "yAxis":
-            case "root":
             case "columnConstraints":
             case "rowConstraints":
               listName = Character.toUpperCase(newNodeName.charAt(0)) + newNodeName.substring(1);
@@ -319,6 +319,76 @@ public class Utils {
                 }
               }
               break;
+            case "root":
+              listName = Character.toUpperCase(newNodeName.charAt(0)) + newNodeName.substring(1);
+              listMethodName = "set" + listName;
+              childrens = childNode.getChildNodes();
+              for (k = 0; k < childrens.getLength(); k++) {
+                Node children = childrens.item(k);
+                if (children.getNodeType() == 1) {
+                  Node source;
+                  String includeName, nodeName = children.getNodeName();
+                  switch (nodeName) {
+                    case "fx:include":
+                      source = children.getAttributes().getNamedItem("source");
+                      includeName = source.getNodeValue();
+                      includeName = includeName.substring(0, includeName.lastIndexOf('.'));
+                      if (includeName != null && !includeName.isEmpty()) {
+                        String includeNode = createInclude(includeName);
+                        prefix = variableName + dot + listMethodName;
+                        declarationNode = new DeclarationNode("{0}({2});", prefix, includeNode);
+                        childList.add(declarationNode);
+                      }
+                      break;
+                    default:
+                      fXNode = new FXNode(children, false);
+                      if (fXNode.isDeclared()) {
+                        attributeList.addAll(fXNode.getAttributeList());
+                        childList.addAll(fXNode.getChildList());
+                        prefix = variableName + dot + listMethodName;
+                        declarationNode = new DeclarationNode("{0}({1});", prefix, fXNode);
+                        childList.add(declarationNode);
+                      }
+                      break;
+                  }
+                }
+              }
+              break;
+            default:
+              String childrenGetter = switch (actualNode.getNodeName())
+              {
+                case "SplitPane" -> "getItems()";
+                default -> "getChildren()";
+              };
+                Node source;
+                String includeName, nodeName = childNode.getNodeName();
+                switch (nodeName)
+                {
+                  case "fx:include":
+                    source = childNode.getAttributes().getNamedItem("source");
+                    includeName = source.getNodeValue();
+                    includeName = includeName.substring(0, includeName.lastIndexOf('.'));
+                    if (includeName != null && !includeName.isEmpty())
+                    {
+                      String includeNode = createInclude(includeName);
+                      prefix = variableName + dot + childrenGetter;
+                      declarationNode =
+                              new DeclarationNode("{0}{1}({2});", new Object[]{prefix, ".add", includeNode});
+                      childList.add(declarationNode);
+                    }
+                    break;
+                  default:
+                    fXNode = new FXNode(childNode, false);
+                    if (fXNode.isDeclared())
+                    {
+                      attributeList.addAll(fXNode.getAttributeList());
+                      childList.addAll(fXNode.getChildList());
+                      prefix = variableName + dot + childrenGetter;
+                      declarationNode = new DeclarationNode("{0}{1}({2});", new Object[]{prefix, ".add", fXNode});
+                      childList.add(declarationNode);
+                    }
+                    break;
+                }
           }
         }
       }
