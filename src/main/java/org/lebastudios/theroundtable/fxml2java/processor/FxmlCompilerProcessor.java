@@ -1,21 +1,21 @@
 package org.lebastudios.theroundtable.fxml2java.processor;
 
+import com.google.auto.service.AutoService;
 import org.lebastudios.theroundtable.fxml2java.CompileFxml;
 import org.lebastudios.theroundtable.fxml2java.converter.FXMLToJavaConvertor;
 import org.lebastudios.theroundtable.fxml2java.converter.MainClass;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.*;
+import java.util.Objects;
 import java.util.Set;
 
-@SupportedAnnotationTypes("org.lebastudios.therountable.fxml2java.CompileFxml")
+@AutoService(Processor.class)
+@SupportedAnnotationTypes("org.lebastudios.theroundtable.fxml2java.CompileFxml")
 @SupportedSourceVersion(SourceVersion.RELEASE_22)
 public class FxmlCompilerProcessor extends AbstractProcessor
 {
@@ -23,12 +23,24 @@ public class FxmlCompilerProcessor extends AbstractProcessor
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
     {
         for (Element element : roundEnv.getElementsAnnotatedWith(CompileFxml.class)) {
-            
+
             CompileFxml compileFxml = element.getAnnotation(CompileFxml.class);
-            
+
             for (String fxmlPath : compileFxml.fxmls())
             {
                 generateCompiledFxml(fxmlPath);
+            }
+            
+            for (String dir : compileFxml.directories())
+            {
+                File directory = new File(dir);
+                if (!directory.exists() || !directory.isDirectory()) continue;
+                
+                for (File fxml : Objects.requireNonNull(directory.listFiles(
+                        pathname -> pathname.getName().endsWith(".fxml") && pathname.isFile())))
+                {
+                    generateCompiledFxml(fxml.getAbsolutePath());
+                }
             }
         }
         
@@ -54,6 +66,11 @@ public class FxmlCompilerProcessor extends AbstractProcessor
         String packageName = pathToFxml.substring(pathToFxml.indexOf("resources") + 10)
                 .replace(fxmlFileName, "")
                 .replace("/", ".");
+        
+        if (packageName.endsWith(".")) 
+        {
+            packageName = packageName.substring(0, packageName.length() - 1);
+        }
 
         try
         {
@@ -64,9 +81,9 @@ public class FxmlCompilerProcessor extends AbstractProcessor
             )
             {
                 MainClass mainClass = new MainClass(className, packageName);
-                mainClass.setClassModifiers(1, 1024);
-                mainClass.setNodeModifiers(4, 16);
-                mainClass.setMethodModifiers(4, 1024);
+                mainClass.setClassModifiers(1);
+                mainClass.setNodeModifiers(1, 16);
+                mainClass.setMethodModifiers(2);
                 FXMLToJavaConvertor convertor = new FXMLToJavaConvertor();
                 convertor.convert(mainClass, inputStream);
 

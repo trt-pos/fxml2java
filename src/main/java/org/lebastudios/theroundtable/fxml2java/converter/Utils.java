@@ -12,6 +12,18 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class Utils {
+  
+  private static Utils instance;
+  
+  public static Utils getInstance()
+  {
+      if (instance == null) instance = new Utils();
+      
+      return instance;
+  }
+  
+  private Utils() {}
+  
   public static Double[] getInsets(Node insets) {
     Node valueNode = insets.getAttributes().getNamedItem("top");
     double top = Double.parseDouble((valueNode == null) ? "0.0" : valueNode.getNodeValue());
@@ -337,13 +349,12 @@ public class Utils {
       if (classFromName != null)
         return classFromName;
     }
-    return Node.class;
+    throw new RuntimeException("Class not found while generating the compile fxml: " + className);
   }
 
   private static Class<?> getClassFromName(String fullName) {
     try {
-      Class<?> loadClass = Class.forName(fullName, false, ClassLoader.getSystemClassLoader());
-      return loadClass;
+        return Class.forName(fullName, false, getInstance().getClass().getClassLoader());
     } catch (Exception ex) {
       return null;
     }
@@ -463,7 +474,7 @@ public class Utils {
         default:
           if (value.equals("-Infinity"))
             value = "USE_PREF_SIZE";
-          if (value.equals("1.7976931348623157E308"))
+          if (value.equals("1.7976931348623157E308") || value.equals("Infinity"))
             value = "Double.MAX_VALUE";
           if (Character.isUpperCase(simpleName.codePointAt(0))) {
             types = method.getGenericParameterTypes();

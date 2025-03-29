@@ -1,11 +1,11 @@
 package org.lebastudios.theroundtable.fxml2java.converter;
 
 import java.lang.reflect.Modifier;
-import javafx.scene.Parent;
+
 import org.w3c.dom.Node;
 
 public class MainClass {
-  private Class<?> extendedClass;
+  private String extendedClassName;
 
   private CodeBuilder mainBuilder;
 
@@ -24,6 +24,7 @@ public class MainClass {
   private final String className;
 
   private static String packageName;
+  private static String controllerClassName;
 
   private static int classModifier;
 
@@ -34,10 +35,12 @@ public class MainClass {
   private static OnIncludeListener includeListener;
 
   public MainClass(String className, String packageName) {
+    controllerClassName = className.replace("$View", "Controller");
     this.className = className;
     MainClass.packageName = packageName;
     importList = new StringList();
     initList = new StringList();
+    initList.add(new DeclarationNode("{0}", "this.controller = controller;"));
     this.attributeList = new StringList();
     this.childList = new StringList();
     methodList = new StringList();
@@ -79,8 +82,9 @@ public class MainClass {
 
   private CodeBuilder createClass() {
     CodeBuilder classBuilder = new CodeBuilder(new String[] { Modifier.toString(classModifier) + " class " + this.className, "    " });
-    String extendedClassName = (this.extendedClass == null) ? " {\n\n" : (" extends " + this.extendedClass.getSimpleName() + " {\n\n");
+    String extendedClassName = (this.extendedClassName == null) ? " {\n\n" : (" extends " + this.extendedClassName + " {\n\n");
     classBuilder.appendWithoutIndent(extendedClassName);
+    classBuilder.appendWithoutIndent("    " + controllerClassName + " controller;\n");
     classBuilder.appendWithoutIndent(declarationList.toString(classBuilder.getIndent()));
     classBuilder.append(createConstructor(classBuilder.getIndent()));
     classBuilder.append("}\n");
@@ -91,7 +95,8 @@ public class MainClass {
     String consModifier = "public";
     if (Modifier.isPrivate(classModifier))
       consModifier = "private";
-    CodeBuilder constructorBuilder = new CodeBuilder(new String[] { consModifier + " " + this.className + "() {\n\n", indent + "    " });
+    CodeBuilder constructorBuilder = new CodeBuilder(consModifier + " " + this.className 
+            + "(" + controllerClassName + " controller"  + ") {\n\n", indent + "    ");
     constructorBuilder.appendWithoutIndent(initList.toString(constructorBuilder.getIndent()));
     constructorBuilder.appendWithoutIndent(this.attributeList.toString(constructorBuilder.getIndent()));
     constructorBuilder.appendWithoutIndent(this.childList.toString(constructorBuilder.getIndent()));
@@ -139,7 +144,7 @@ public class MainClass {
     if (!methodList.contains(newMethod)) {
       methodList.add(newMethod);
       if (!isAbstract) {
-        methodList.add("    //TODO");
+        methodList.add("        controller." + methodName + "(" + variableName + ");");
         methodList.add("}");
       }
       if (!Modifier.isAbstract(classModifier))
@@ -156,9 +161,9 @@ public class MainClass {
     this.childList.addAll(filterList(fXNode.getChildList()));
     this.attributeList.addAll(filterList(fXNode.getAttributeList()));
     if (fXNode.getShortestParameterCount() == 0 && !fXNode.isFinal()) {
-      this.extendedClass = fXNode.getNodeClass();
+      this.extendedClassName = fXNode.getNodeName();
     } else {
-      this.extendedClass = Parent.class;
+      this.extendedClassName = "Parent";
       String parentImport = "javafx.scene.Parent";
       if (!containsImport(parentImport))
         importList.add(new DeclarationNode("{0} {1}{2}", new Object[] { "import", parentImport, ";" }));

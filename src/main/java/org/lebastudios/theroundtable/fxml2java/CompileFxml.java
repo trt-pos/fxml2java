@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface CompileFxml
 {
-    String[] fxmls();
+    String[] fxmls() default {};
+    String[] directories() default {};
 }
