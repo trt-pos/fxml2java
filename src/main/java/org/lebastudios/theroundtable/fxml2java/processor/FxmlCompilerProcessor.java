@@ -4,12 +4,12 @@ import com.google.auto.service.AutoService;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.TypeTag;
-import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Names;
+import com.sun.tools.javac.util.Options;
 import org.lebastudios.theroundtable.fxml2java.CompileFxml;
 import org.lebastudios.theroundtable.fxml2java.converter.FXMLToJavaConvertor;
 import org.lebastudios.theroundtable.fxml2java.converter.MainClass;
@@ -38,12 +38,20 @@ public class FxmlCompilerProcessor extends AbstractProcessor
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         trees = Trees.instance(processingEnv);
-        
-        Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
-        treeMaker = TreeMaker.instance(context);
-        names = Names.instance(context);
+
+        try
+        {
+            Context context = (Context) processingEnv.getClass().getMethod("getContext").invoke(processingEnv);
+
+            treeMaker = TreeMaker.instance(context);
+            names = Names.instance(context);
+        }
+        catch (Exception exception)
+        {
+            
+        }
     }
-    
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
     {
@@ -53,11 +61,7 @@ public class FxmlCompilerProcessor extends AbstractProcessor
 
             CompileFxml compileFxml = element.getAnnotation(CompileFxml.class);
             
-            for (String fxmlPath : compileFxml.fxmls())
-            {
-                generateCompiledFxml(fxmlPath);
-            }
-
+            fxmlPaths.addAll(Arrays.stream(compileFxml.fxmls()).toList());
 
             for (String dir : compileFxml.directories())
             {
@@ -67,7 +71,6 @@ public class FxmlCompilerProcessor extends AbstractProcessor
                 for (File fxml : Objects.requireNonNull(directory.listFiles(
                         pathname -> pathname.getName().endsWith(".fxml") && pathname.isFile())))
                 {
-                    generateCompiledFxml(fxml.getAbsolutePath());
                     fxmlPaths.add(fxml.getAbsolutePath());
                 }
             }
@@ -75,8 +78,8 @@ public class FxmlCompilerProcessor extends AbstractProcessor
         
         for (String fxmlPath : fxmlPaths)
         {
-            //generateCompiledFxml(fxmlPath);
-            //generateControllerMethod(fxmlPath);
+            generateCompiledFxml(fxmlPath);
+            generateControllerMethod(fxmlPath);
         }
         
         return true;
@@ -134,6 +137,8 @@ public class FxmlCompilerProcessor extends AbstractProcessor
                 + fxmlFileName.substring(1).replace(".fxml", "")
                 + "Controller";
 
+        String viewClassName = className.replace("Controller", "$View");
+        
         String packageName = pathToFxml.substring(pathToFxml.indexOf("resources") + 10)
                 .replace(fxmlFileName, "")
                 .replace("/", ".");
@@ -148,28 +153,50 @@ public class FxmlCompilerProcessor extends AbstractProcessor
         );
         JCTree tree = (JCTree) trees.getTree(typeElement);
         if (tree instanceof JCTree.JCClassDecl classDecl) {
-            classDecl.defs = classDecl.defs.append(generarMetodo());
+            classDecl.defs = classDecl.defs.append(generarMetodo(viewClassName));
         }
     }
 
-    private JCTree.JCMethodDecl generarMetodo() {
+    private JCTree.JCMethodDecl generarMetodo(String viewClassName) {
+        JCTree.JCFieldAccess thisRoot = treeMaker.Select(
+                treeMaker.Ident(names.fromString("this")), names.fromString("root")
+        );
+
+        JCTree.JCNewClass newInstance = treeMaker.NewClass(
+                null,                          // No hay tipo externo
+                List.nil(),                    // No hay argumentos de tipo genérico
+                treeMaker.Ident(names.fromString(viewClassName)), // Nombre de la clase
+                List.of(treeMaker.Ident(names.fromString("this"))),  // Argumentos del constructor
+                null                           // No hay cuerpo de clase anidado
+        );
+
+        JCTree.JCExpressionStatement assignStatement = treeMaker.Exec(
+                treeMaker.Assign(thisRoot, newInstance)
+        );
+
+        JCTree.JCExpressionStatement initializeCall = treeMaker.Exec(
+                treeMaker.Apply(
+                        List.nil(),
+                        treeMaker.Select(
+                                treeMaker.Ident(names.fromString("this")),
+                                names.fromString("initialize")
+                        ),
+                        List.nil()
+                )
+        );
+
+        // Crea un bloque con ambas instrucciones
+        JCTree.JCBlock block = treeMaker.Block(0, List.of(assignStatement, initializeCall));
+
         return treeMaker.MethodDef(
-                treeMaker.Modifiers(Flags.PUBLIC),
-                names.fromString("metodoGenerado"),
-                treeMaker.TypeIdent(TypeTag.VOID),
-                List.nil(),
-                List.nil(),
-                List.nil(),
-                treeMaker.Block(0, List.of(
-                        treeMaker.Exec(
-                                treeMaker.Apply(
-                                        List.nil(),
-                                        treeMaker.Select(treeMaker.Ident(names.fromString("System.out")), names.fromString("println")),
-                                        List.of(treeMaker.Literal("Método generado"))
-                                )
-                        )
-                )),
-                null
+                treeMaker.Modifiers(Flags.PROTECTED),  // Modificadores con la anotación @Override
+                names.fromString("loadFXML"),  // Nombre del método
+                treeMaker.TypeIdent(TypeTag.VOID),   // Tipo de retorno (void)
+                List.nil(),                          // Parámetros vacíos
+                List.nil(),                          // Excepciones lanzadas (vacío)
+                List.nil(),                          // Anotaciones (vacío)
+                block,                               // El bloque con la asignación y la llamada
+                null                                 // Comentarios (null)
         );
     }
 }

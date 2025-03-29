@@ -1,5 +1,9 @@
 import javafx.scene.Node;
+import org.lebastudios.theroundtable.fxml2java.CompileFxml;
 
+@CompileFxml(
+        fxmls = "src/main/resources/testUi.fxml"
+)
 public class TestUiController
 {
     public Node enableRemoteDb;
