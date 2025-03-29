@@ -43,7 +43,7 @@ public class Utils {
     newVariableName = Character.toLowerCase(newVariableName.charAt(0)) + newVariableName.substring(1);
     Node namedItem = node.getAttributes().getNamedItem("fx:id");
     if (namedItem != null)
-      newVariableName = namedItem.getNodeValue();
+      newVariableName = "$" + namedItem.getNodeValue();
     return getVariableNameFor(declarationList, newVariableName);
   }
 

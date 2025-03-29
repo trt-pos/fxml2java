@@ -45,9 +45,9 @@ public class MainClass {
     this.childList = new StringList();
     methodList = new StringList();
     declarationList = new StringList();
-    classModifier = 1;
+    classModifier = Modifier.PUBLIC;
     nodeModifier = 18;
-    methodModifier = 2;
+    methodModifier = Modifier.PRIVATE;
   }
 
   public void setClassModifiers(int... modifiers) {
@@ -84,7 +84,7 @@ public class MainClass {
     CodeBuilder classBuilder = new CodeBuilder(new String[] { Modifier.toString(classModifier) + " class " + this.className, "    " });
     String extendedClassName = (this.extendedClassName == null) ? " {\n\n" : (" extends " + this.extendedClassName + " {\n\n");
     classBuilder.appendWithoutIndent(extendedClassName);
-    classBuilder.appendWithoutIndent("    " + controllerClassName + " controller;\n");
+    classBuilder.appendWithoutIndent("    public final " + controllerClassName + " controller;\n");
     classBuilder.appendWithoutIndent(declarationList.toString(classBuilder.getIndent()));
     classBuilder.append(createConstructor(classBuilder.getIndent()));
     classBuilder.append("}\n");
@@ -98,6 +98,22 @@ public class MainClass {
     CodeBuilder constructorBuilder = new CodeBuilder(consModifier + " " + this.className 
             + "(" + controllerClassName + " controller"  + ") {\n\n", indent + "    ");
     constructorBuilder.appendWithoutIndent(initList.toString(constructorBuilder.getIndent()));
+    
+    // initList constains the fields of the class. 
+    // each field that starts with $ is a named node (fx:id) and the controller needs to know them
+    // so we need to add them to the constructor
+      for (Object o : initList)
+      {
+          String line = o.toString();
+          if (line.startsWith("$"))
+          {
+              String variableName = line.substring(1, line.indexOf('='));
+              constructorBuilder.appendWithoutIndent("        controller." + variableName 
+                      + " = this.$" + variableName + ";\n");
+          }
+      }
+      constructorBuilder.appendWithoutIndent("\n");
+    
     constructorBuilder.appendWithoutIndent(this.attributeList.toString(constructorBuilder.getIndent()));
     constructorBuilder.appendWithoutIndent(this.childList.toString(constructorBuilder.getIndent()));
     return constructorBuilder;
@@ -147,7 +163,7 @@ public class MainClass {
         methodList.add("        controller." + methodName + "(" + variableName + ");");
         methodList.add("}");
       }
-      if (!Modifier.isAbstract(classModifier))
+      if (!Modifier.isAbstract(classModifier) && isAbstract)
         classModifier += 1024;
     }
   }

@@ -81,9 +81,7 @@ public class FxmlCompilerProcessor extends AbstractProcessor
             )
             {
                 MainClass mainClass = new MainClass(className, packageName);
-                mainClass.setClassModifiers(1);
                 mainClass.setNodeModifiers(1, 16);
-                mainClass.setMethodModifiers(2);
                 FXMLToJavaConvertor convertor = new FXMLToJavaConvertor();
                 convertor.convert(mainClass, inputStream);
 
