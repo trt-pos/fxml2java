@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @AutoService(Processor.class)
 @SupportedAnnotationTypes("org.lebastudios.theroundtable.fxml2java.CompileFxml")
@@ -131,6 +133,14 @@ public class FxmlCompilerProcessor extends AbstractProcessor
                 convertor.convert(mainClass, inputStream);
 
                 String content = mainClass.toString();
+
+                Matcher matcher = Pattern.compile("\"%([^ \"]*)\"").matcher(content);
+                while (matcher.find())
+                {
+                    String translationKey = matcher.group(1);
+                    content = content.replace(matcher.group(0), "LangFileLoader.getTranslation(\"" + translationKey + "\")");
+                }
+                
                 writer.write(content);
             }
         }

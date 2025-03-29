@@ -4,6 +4,8 @@ import org.lebastudios.theroundtable.fxml2java.converter.FXMLToJavaConvertor;
 import org.lebastudios.theroundtable.fxml2java.converter.MainClass;
 
 import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main
 {
@@ -51,6 +53,14 @@ public class Main
                 convertor.convert(mainClass, inputStream);
 
                 String content = mainClass.toString();
+
+                Matcher matcher = Pattern.compile("\"%([^ \"]*)\"").matcher(content);
+                while (matcher.find())
+                {
+                    String translationKey = matcher.group(1);
+                    content = content.replace(matcher.group(0), "LangFileLoader.getTranslation(\"" + translationKey + "\")");
+                }
+                
                 writer.write(content);
             }
         }
