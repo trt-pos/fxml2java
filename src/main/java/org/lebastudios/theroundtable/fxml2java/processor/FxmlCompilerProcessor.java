@@ -18,7 +18,9 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,16 +69,30 @@ public class FxmlCompilerProcessor extends AbstractProcessor
             
             fxmlPaths.addAll(Arrays.stream(compileFxml.fxmls()).toList());
 
-            for (String dir : compileFxml.directories())
+            try
             {
-                File directory = new File(dir);
-                if (!directory.exists() || !directory.isDirectory()) continue;
-                
-                for (File fxml : Objects.requireNonNull(directory.listFiles(
-                        pathname -> pathname.getName().endsWith(".fxml") && pathname.isFile())))
+                for (String dir : compileFxml.directories())
                 {
-                    fxmlPaths.add(fxml.getAbsolutePath());
+                    Filer filer = processingEnv.getFiler();
+                    String tmpFile = filer.createResource(
+                            StandardLocation.CLASS_OUTPUT,
+                            dir.replace("/", "."),
+                            "dummy.txt"
+                    ).toUri().getPath();
+
+                    File directory = new File(tmpFile).getParentFile();
+                    if (!directory.exists() || !directory.isDirectory()) continue;
+
+                    for (File fxml : Objects.requireNonNull(directory.listFiles(
+                            pathname -> pathname.getName().endsWith(".fxml") && pathname.isFile())))
+                    {
+                        fxmlPaths.add(dir + "/" + fxml.getName());
+                    }
                 }
+            }
+            catch (Exception exception)
+            {
+                throw new RuntimeException(exception);
             }
         }
         
@@ -109,8 +125,8 @@ public class FxmlCompilerProcessor extends AbstractProcessor
                 .substring(0, 1).toUpperCase()
                 + fxmlFileName.substring(1).replace(".fxml", "")
                 + "$View";
-
-        String packageName = pathToFxml.substring(pathToFxml.indexOf("resources") + 10)
+        
+        String packageName = pathToFxml
                 .replace(fxmlFileName, "")
                 .replace("/", ".");
         
@@ -119,11 +135,21 @@ public class FxmlCompilerProcessor extends AbstractProcessor
             packageName = packageName.substring(0, packageName.length() - 1);
         }
 
+        if (packageName.startsWith(".")) 
+        {
+            packageName = packageName.substring(1);
+        }
+        
         try
         {
             JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(className);
+            FileObject resource = processingEnv.getFiler().getResource(
+                    StandardLocation.CLASS_OUTPUT,
+                    packageName,
+                    fxmlFileName
+            );
             
-            try (InputStream inputStream = new FileInputStream(fxmlFile);
+            try (InputStream inputStream = resource.openInputStream();
                  Writer writer = builderFile.openWriter()
             )
             {
