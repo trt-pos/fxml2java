@@ -188,7 +188,7 @@ public class FxmlCompilerProcessor extends AbstractProcessor
 
         String viewClassName = className.replace("Controller", "$View");
         
-        String packageName = pathToFxml.substring(pathToFxml.indexOf("resources") + 10)
+        String packageName = pathToFxml
                 .replace(fxmlFileName, "")
                 .replace("/", ".");
 
