@@ -244,6 +244,7 @@ public class Utils {
             case "side": 
             case "root":
             case "header":
+            case "clip":
             case "toggleGroup":
             case "expandableContent":
               methodName = Character.toUpperCase(newNodeName.charAt(0)) + newNodeName.substring(1);
