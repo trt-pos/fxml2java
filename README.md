@@ -74,7 +74,7 @@ protected void loadFXML()
 To avoid this, you can override the `loadFXML` method in your controller class as follows:
 ```java
 @Override
-protected void loadFxml()
+protected void loadFXML()
 {
     this.root = new ExampleUi$View(this);
     this.initialize();
