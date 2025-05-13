@@ -1,4 +1,10 @@
 package org.lebastudios.theroundtable.fxml2java.converter;
+
+import javafx.scene.control.ComboBoxBase;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -6,10 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.scene.control.ComboBoxBase;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class Utils {
   

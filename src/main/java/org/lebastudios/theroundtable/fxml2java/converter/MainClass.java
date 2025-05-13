@@ -1,8 +1,8 @@
 package org.lebastudios.theroundtable.fxml2java.converter;
 
-import java.lang.reflect.Modifier;
-
 import org.w3c.dom.Node;
+
+import java.lang.reflect.Modifier;
 
 public class MainClass {
   private String extendedClassName;

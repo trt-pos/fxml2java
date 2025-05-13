@@ -1,8 +1,9 @@
 package org.lebastudios.theroundtable.fxml2java.converter;
 
+import org.w3c.dom.Node;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import org.w3c.dom.Node;
 
 public class FXNode {
   private final StringList attributeList;
