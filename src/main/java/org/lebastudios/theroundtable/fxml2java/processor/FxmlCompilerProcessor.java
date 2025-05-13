@@ -116,7 +116,7 @@ public class FxmlCompilerProcessor extends AbstractProcessor
                 while (matcher.find())
                 {
                     String translationKey = matcher.group(1);
-                    content = content.replace(matcher.group(0), "LangFileLoader.getTranslation(\"" + translationKey + "\")");
+                    content = content.replace(matcher.group(0), "Translator.t(\"" + translationKey + "\")");
                 }
                 
                 writer.write(content);

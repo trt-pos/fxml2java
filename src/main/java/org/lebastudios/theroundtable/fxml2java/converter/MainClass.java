@@ -145,7 +145,7 @@ public class MainClass {
   public String toString() {
     String packageValue = (packageName == null || packageName.isEmpty()) ? "\n" : ("package " + packageName + ";\n\n");
     this.mainBuilder = new CodeBuilder(new String[] { packageValue });
-    this.mainBuilder.append("import org.lebastudios.theroundtable.locale.LangFileLoader;\n");
+    this.mainBuilder.append("import org.lebastudios.theroundtable.locale.Translator;\n");
     this.mainBuilder.append(importList.toString());
     this.mainBuilder.append(createClass());
     this.mainBuilder.append(methodList.toString("    "));
