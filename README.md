@@ -103,7 +103,7 @@ Add the following dependency to your `pom.xml`:
     <dependency>
         <groupId>com.github.trt-pos</groupId>
         <artifactId>fxml2java</artifactId>
-        <version>v0.4.0</version>
+        <version>v0.5.0</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -122,7 +122,7 @@ Add the following compiler plugin configuration to your `pom.xml`:
             <path>
                 <groupId>com.github.trt-pos</groupId>
                 <artifactId>fxml2java</artifactId>
-                <version>v0.3.0</version>
+                <version>v0.5.0</version>
             </path>
             <path>
                 <groupId>org.lebastudios.theroundtable</groupId>

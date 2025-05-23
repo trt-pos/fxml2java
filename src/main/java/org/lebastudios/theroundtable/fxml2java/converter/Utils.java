@@ -5,6 +5,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -402,7 +404,6 @@ public class Utils {
   public static void setAttributes(FXNode fXNode, String variableName, String dot) {
     Class<?> nodeClass = fXNode.getNodeClass();
     StringList attributeList = fXNode.getAttributeList();
-    fXNode.getAttributeList();
     if (nodeClass != null) {
       NamedNodeMap attributes = fXNode.getNode().getAttributes();
       Method[] methods = nodeClass.getMethods();
@@ -456,7 +457,16 @@ public class Utils {
               nodeValue = "/" + MainClass.getPackageName().replace(".", "/") + "/" + nodeValue;
               location = "\"" + nodeValue + "\"";
               attributeList.add(variableName + dot + "getStylesheets().add(" + location + ");");
-              break;
+              break; 
+            case "fx:id":
+                  methodNodeName = "setId";
+                  for (Method method : methods) {
+                      if (method.getName().equals(methodNodeName)) {
+                          addAttribute(variableName + dot, method, attributeNode, methodNodeName, attributeList);
+                          break;
+                      }
+                  }
+                break;
             default:
               methodNodeName = "set" + Character.toUpperCase(methodNodeName.charAt(0)) + methodNodeName.substring(1);
               for (Method method : methods) {
